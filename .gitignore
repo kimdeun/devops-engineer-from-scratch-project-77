@@ -1,0 +1,11 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+terraform/secrets.auto.tfvars
+terraform/backend.hcl
+ansible/.vault_password
+ansible/vault.local.yml
+ansible/roles/
+*.retry

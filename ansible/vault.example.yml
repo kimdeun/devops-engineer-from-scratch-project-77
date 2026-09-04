@@ -1,0 +1,14 @@
+---
+vault_yc_token: replace-me
+vault_yc_cloud_id: replace-me
+vault_yc_folder_id: replace-me
+vault_ssh_public_key: "ssh-ed25519 AAAA... user@example"
+vault_ssh_allowed_cidrs:
+  - 203.0.113.10/32
+vault_state_bucket: replace-me
+vault_state_key: project-77/terraform.tfstate
+vault_s3_access_key: replace-me
+vault_s3_secret_key: replace-me
+vault_duckdns_token: replace-me
+vault_datadog_api_key: replace-me
+vault_datadog_app_key: replace-me

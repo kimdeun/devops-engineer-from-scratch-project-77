@@ -1,0 +1,54 @@
+---
+- name: Prepare web servers and deploy the application
+  hosts: web
+  become: true
+  vars_files:
+    - vault.yml
+  vars:
+    application_image: "nginxdemos/hello:plain-text"
+    application_container_name: "project-77-web"
+    datadog_api_key: "{{ vault_datadog_api_key }}"
+    datadog_site: "datadoghq.com"
+    datadog_config:
+      tags:
+        - "env:production"
+        - "service:project-77"
+    datadog_checks:
+      http_check:
+        init_config: {}
+        instances:
+          - name: project-77-local
+            url: http://localhost/
+            timeout: 5
+            tags:
+              - "env:production"
+              - "service:project-77"
+  roles:
+    - role: datadog.datadog
+      tags: [monitoring]
+  tasks:
+    - name: Install Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - python3-docker
+        state: present
+        update_cache: true
+      tags: [prepare]
+
+    - name: Enable and start Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+      tags: [prepare]
+
+    - name: Run application container
+      community.docker.docker_container:
+        name: "{{ application_container_name }}"
+        image: "{{ application_image }}"
+        pull: true
+        restart_policy: unless-stopped
+        published_ports:
+          - "80:80"
+      tags: [deploy]
