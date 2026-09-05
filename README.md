@@ -12,6 +12,7 @@ Terraform создаёт в Yandex Cloud два веб-сервера и Applica
 - HTTPS listener на порту 443 с сертификатом из Certificate Manager;
 - удалённый S3 backend в Yandex Object Storage;
 - Datadog Agent на каждой VM и Terraform-managed alert локальной HTTP-проверки.
+- Upmon heartbeat публичного HTTPS-адреса с email-уведомлениями.
 
 Стейт, сгенерированные секреты и backend-конфигурация исключены из Git.
 
@@ -19,6 +20,7 @@ Terraform создаёт в Yandex Cloud два веб-сервера и Applica
 
 - Terraform 1.6 или новее;
 - Ansible;
+- Yandex Cloud CLI (`yc`), авторизованный командой `yc init`;
 - аккаунт и каталог Yandex Cloud;
 - бакет Object Storage и статический ключ сервисного аккаунта с доступом к нему;
 - SSH-ключ;
@@ -96,6 +98,7 @@ make ping
 make prepare
 make deploy
 make monitoring
+make uptime
 curl https://hexlet-project-77.duckdns.org/
 ```
 
@@ -103,6 +106,10 @@ curl https://hexlet-project-77.duckdns.org/
 `http://localhost/`. Terraform создаёт service-check monitor, который переходит в
 критическое состояние после двух неуспешных проверок. Ключи Datadog находятся в
 зашифрованном `ansible/vault.yml` и не сохраняются в открытом виде в репозитории.
+
+`make uptime` устанавливает на обе VM systemd timer. Каждые пять минут сервер
+проверяет публичный HTTPS-адрес приложения и только после успешного ответа
+отправляет heartbeat в Upmon. Уникальный `vault_upmon_ping_url` хранится в Vault.
 
 Для полного запуска плейбука без фильтра тегов:
 

@@ -1,0 +1,22 @@
+---
+application_image: "nginxdemos/hello:plain-text"
+application_container_name: "project-77-web"
+application_url: "https://hexlet-project-77.duckdns.org/"
+upmon_ping_url: "{{ vault_upmon_ping_url }}"
+
+datadog_api_key: "{{ vault_datadog_api_key }}"
+datadog_site: "datadoghq.com"
+datadog_config:
+  tags:
+    - "env:production"
+    - "service:project-77"
+datadog_checks:
+  http_check:
+    init_config: {}
+    instances:
+      - name: project-77-local
+        url: http://localhost/
+        timeout: 5
+        tags:
+          - "env:production"
+          - "service:project-77"

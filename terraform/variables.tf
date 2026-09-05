@@ -1,9 +1,3 @@
-variable "yc_token" {
-  description = "Yandex Cloud OAuth or IAM token."
-  type        = string
-  sensitive   = true
-}
-
 variable "yc_cloud_id" {
   description = "Yandex Cloud cloud ID."
   type        = string

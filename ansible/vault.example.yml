@@ -1,5 +1,4 @@
 ---
-vault_yc_token: replace-me
 vault_yc_cloud_id: replace-me
 vault_yc_folder_id: replace-me
 vault_ssh_public_key: "ssh-ed25519 AAAA... user@example"
@@ -12,3 +11,4 @@ vault_s3_secret_key: replace-me
 vault_duckdns_token: replace-me
 vault_datadog_api_key: replace-me
 vault_datadog_app_key: replace-me
+vault_upmon_ping_url: https://upmon.net/replace-me

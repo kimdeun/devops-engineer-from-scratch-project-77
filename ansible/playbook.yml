@@ -4,45 +4,12 @@
   become: true
   vars_files:
     - vault.yml
-  vars:
-    application_image: "nginxdemos/hello:plain-text"
-    application_container_name: "project-77-web"
-    datadog_api_key: "{{ vault_datadog_api_key }}"
-    datadog_site: "datadoghq.com"
-    datadog_config:
-      tags:
-        - "env:production"
-        - "service:project-77"
-    datadog_checks:
-      http_check:
-        init_config: {}
-        instances:
-          - name: project-77-local
-            url: http://localhost/
-            timeout: 5
-            tags:
-              - "env:production"
-              - "service:project-77"
   roles:
+    - role: geerlingguy.docker
+      tags: [prepare]
     - role: datadog.datadog
       tags: [monitoring]
   tasks:
-    - name: Install Docker packages
-      ansible.builtin.apt:
-        name:
-          - docker.io
-          - python3-docker
-        state: present
-        update_cache: true
-      tags: [prepare]
-
-    - name: Enable and start Docker
-      ansible.builtin.service:
-        name: docker
-        state: started
-        enabled: true
-      tags: [prepare]
-
     - name: Run application container
       community.docker.docker_container:
         name: "{{ application_container_name }}"
@@ -52,3 +19,48 @@
         published_ports:
           - "80:80"
       tags: [deploy]
+
+    - name: Create project monitoring configuration directory
+      ansible.builtin.file:
+        path: /etc/project-77
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+      tags: [uptime]
+
+    - name: Store Upmon heartbeat environment
+      ansible.builtin.template:
+        src: templates/upmon.env.j2
+        dest: /etc/project-77/upmon.env
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+      tags: [uptime]
+
+    - name: Install Upmon heartbeat service
+      ansible.builtin.template:
+        src: templates/upmon-heartbeat.service.j2
+        dest: /etc/systemd/system/project-77-upmon.service
+        owner: root
+        group: root
+        mode: "0644"
+      tags: [uptime]
+
+    - name: Install Upmon heartbeat timer
+      ansible.builtin.template:
+        src: templates/upmon-heartbeat.timer.j2
+        dest: /etc/systemd/system/project-77-upmon.timer
+        owner: root
+        group: root
+        mode: "0644"
+      tags: [uptime]
+
+    - name: Enable and start Upmon heartbeat timer
+      ansible.builtin.systemd_service:
+        name: project-77-upmon.timer
+        state: started
+        enabled: true
+        daemon_reload: true
+      tags: [uptime]

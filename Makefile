@@ -6,7 +6,7 @@ VAULT_PASSWORD_FILE := $(ANSIBLE_DIR)/.vault_password
 VAULT_SOURCE ?= $(ANSIBLE_DIR)/vault.local.yml
 export ANSIBLE_LOCAL_TEMP := /private/tmp/ansible-local
 
-.PHONY: install vault-create vault-edit secrets init fmt validate plan apply destroy prepare deploy monitoring ping output clean-generated
+.PHONY: install vault-create vault-edit secrets init fmt validate plan apply destroy prepare deploy monitoring uptime ping output clean-generated
 
 install:
 	ansible-galaxy collection install -r $(ANSIBLE_DIR)/requirements.yml
@@ -33,13 +33,13 @@ validate:
 	terraform -chdir=$(TF_DIR) validate
 
 plan: secrets
-	terraform -chdir=$(TF_DIR) plan -out=project.tfplan
+	YC_TOKEN="$$(yc iam create-token)" terraform -chdir=$(TF_DIR) plan -out=project.tfplan
 
 apply: plan
-	terraform -chdir=$(TF_DIR) apply project.tfplan
+	YC_TOKEN="$$(yc iam create-token)" terraform -chdir=$(TF_DIR) apply project.tfplan
 
 destroy: secrets
-	terraform -chdir=$(TF_DIR) destroy
+	YC_TOKEN="$$(yc iam create-token)" terraform -chdir=$(TF_DIR) destroy
 
 prepare:
 	cd $(ANSIBLE_DIR) && ansible-playbook playbook.yml --tags prepare --vault-password-file .vault_password
@@ -49,6 +49,9 @@ deploy:
 
 monitoring:
 	cd $(ANSIBLE_DIR) && ansible-playbook playbook.yml --tags monitoring --vault-password-file .vault_password
+
+uptime:
+	cd $(ANSIBLE_DIR) && ansible-playbook playbook.yml --tags uptime --vault-password-file .vault_password
 
 ping:
 	cd $(ANSIBLE_DIR) && ansible web -m ping

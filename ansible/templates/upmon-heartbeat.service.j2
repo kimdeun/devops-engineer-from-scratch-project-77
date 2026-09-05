@@ -1,0 +1,12 @@
+[Unit]
+Description=Check project-77 availability and send an Upmon heartbeat
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/project-77/upmon.env
+ExecStart=/bin/sh -ec '/usr/bin/curl --fail --silent --show-error --max-time 15 {{ application_url }} > /dev/null && /usr/bin/curl --fail --silent --show-error --max-time 15 "$UPMON_PING_URL" > /dev/null'
+
+[Install]
+WantedBy=multi-user.target
